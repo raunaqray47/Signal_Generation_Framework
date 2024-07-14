@@ -1,0 +1,15 @@
+ADSB Message Structure - 
+	
+	An ADS-B frame is 112 bits long and consists of five main parts, shown as follows:
++----------+----------+-------------+------------------------+------------+
+|  DF (5)  |  CA (3)  |	 ICAO (24)	|		ME (56)			 |	PI (24)	  |
++----------+----------+-------------+------------------------+------------+
+
+1. DF - Downlink Format 
+	- Civil Aircrafts (DF = 17 - 10001)
+	  Transoner Based - Mode S Extended Squitter
+	- Non Transponder Based Aircrafts (DF = 18 - 10010)
+	  Signifies that equipment interrrogation is not possible.
+
+2. CA - Capability
+	-  

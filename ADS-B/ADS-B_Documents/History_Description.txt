@@ -1,0 +1,131 @@
+ADS-B (Automatic Dependent Surveillance-Broadcast) is a surveillance technology for tracking aircraft.
+
+How ADS-B Works
+
+    Automatic: The system operates automatically without the need for pilot or controller intervention.
+    Dependent: It relies on accurate position data from the aircraft’s navigation system (typically GPS).
+    Surveillance: It is used for surveillance purposes to determine the aircraft’s position and other relevant data.
+    Broadcast: The information is continuously broadcasted to be received by anyone with the appropriate equipment.
+
+Key Components
+
+    ADS-B Out:
+        Transmits information from the aircraft to ground stations and other aircraft.
+        Information includes position, velocity, identification, and other data.
+        Uses frequencies 1090 MHz (worldwide) and 978 MHz (UAT, in the U.S. only for general aviation).
+
+    ADS-B In:
+        Receives ADS-B signals from other aircraft and ground stations.
+        Provides pilots with traffic information (TIS-B) and weather data (FIS-B) in the cockpit.
+        Enhances situational awareness and improves safety.
+
+Data Transmitted
+
+    Position: Latitude, longitude, altitude.
+    Velocity: Speed and direction.
+    Identification: Aircraft’s call sign or flight number.
+    Other Information: Can include vertical rate, emergency status, etc.
+
+Equipment
+
+    ADS-B Transponder: Installed in the aircraft to transmit ADS-B Out signals.
+    ADS-B Receiver: Installed in aircraft or ground stations to receive ADS-B In signals.
+    Ground Stations: Collect ADS-B data and integrate it into air traffic control systems.
+
+Mode S Transponder
+
+Mode S (Mode Select) is a secondary surveillance radar (SSR) system used in air traffic control (ATC) and aircraft surveillance. Here are its key features:
+
+   1. Selective Interrogation: Mode S transponders can be selectively interrogated by ground radar, allowing for targeted communication with specific aircraft.
+   2. Unique Identifier: Each Mode S transponder has a unique 24-bit address, ensuring that each aircraft can be uniquely identified. (ICAO)
+   3. Data Link Capability: Mode S supports data link communications, enabling the transmission of additional data beyond basic identification and altitude. 
+        A data link is like a digital communication channel between the aircraft and ground stations or other aircraft. It allows for the exchange of information electronically, similar to how text messages or emails work.
+
+Relationship between Mode-S and ADS-B
+
+1. Common Hardware:
+
+2. Data Transmission:
+
+    Mode S: Responds to interrogations from ground radar with information such as the aircraft’s identity and altitude.
+    ADS-B Out: Broadcasts position, velocity, and other data autonomously, without requiring interrogation from ground stations.
+
+3. Compatibility:
+
+    ADS-B extends the capabilities of Mode S by providing more frequent and detailed position and velocity data, enhancing situational awareness and surveillance coverage. ADS-B is designed to be compatible with existing Mode S infrastructure. Ground stations and aircraft equipped with Mode S can typically be upgraded to support ADS-B without requiring completely new systems.
+
+4. Functionality:
+
+    Mode S: Primarily used for selective interrogation and identification by ATC radar systems.
+    ADS-B Out: Provides continuous broadcast of aircraft position, velocity, and other data to be received by any compatible ground station or aircraft.
+
+
+Mode-C provides basic altitude information and a 4-digit squawk code. It does not support selective interrogation or provide additional data beyond the basic identification and altitude. It relies on ground radar to interrogate the aircraft, providing basic altitude and identification data. 
+Mode-S is an advanced version of Mode C that includes a unique 24-bit aircraft address, allowing for selective interrogation. It also supports data link capabilities, enabling the exchange of additional information such as aircraft type and flight number. 
+ADS-B does not require interrogation. It continuously broadcasts comprehensive information including GPS-based position, velocity, identification, and other parameters, improving accuracy and providing real-time data to both ground stations and other aircraft.
+
+Secondary Survellience Radar (SSR) Modes - 
+
+1. Mode A: 
+    Description: Transmits a 4-digit identification code (squawk code) assigned by air traffic control.
+    Usage: Provides basic identification information but no altitude data.
+    Timeline: Developed in the 1950s and widely used through the 1960s and beyond.
+
+2. Mode C: 
+    Description: Transmits the aircraft's pressure altitude along with the 4-digit identification code.
+    Usage: Enhances Mode A by adding altitude information, crucial for air traffic control.
+    Timeline: Introduced in the 1960s and remains in use today, particularly in general aviation.
+
+3. Mode S:
+    Description: Provides selective interrogation capabilities with a unique 24-bit aircraft address. Supports data link communications for additional information exchange.
+    Usage: Used for more precise tracking and identification, and supports ADS-B Out transmissions.
+    Timeline: Developed in the 1970s and implemented widely in the 1980s and 1990s.
+
+4. Mode S-ES (Extended Squitter):
+    Description: An enhancement to Mode S that supports ADS-B Out by broadcasting extended information such as GPS position and velocity.
+    Usage: Used for ADS-B Out, providing continuous and detailed position reporting.
+    Timeline: Implemented as part of ADS-B development in the 1990s and 2000s.
+
+5. ADS-B (Automatic Dependent Surveillance-Broadcast):
+    Description: Continuously broadcasts aircraft position, velocity, identification, and other data. It comes in two flavors:
+        ADS-B Out: Broadcasts information from the aircraft to ground stations and other aircraft.
+        ADS-B In: Receives information from other aircraft and ground stations.
+    Usage: Enhances situational awareness, safety, and efficiency in air traffic management.
+    Timeline: Developed in the 1990s and mandated in various regions starting in the 2010s.
+
+6. UAT (Universal Access Transcceiver): 
+    Description: A data link technology used specifically for ADS-B. Operates on the 978 MHz frequency.
+    Usage: Primarily used in the United States for general aviation aircraft as an alternative to the 1090 MHz ADS-B Out.
+    Timeline: Developed alongside ADS-B in the 1990s and 2000s.
+
+7. TCAS (Traffic Collision Avoidance System):
+    Description: A collision avoidance system that uses transponder data to provide alerts and advisories to pilots. TCAS II uses Mode S transponders for more accurate tracking.
+    Usage: Provides traffic advisories (TAs) and resolution advisories (RAs) to prevent mid-air collisions.
+    Timeline: TCAS I was introduced in the 1980s, and TCAS II with Mode S support became standard in the 1990s.
+
+Interrogation Modes - 
+    Mode    P1–P3 pulse spacing     Purpose
+     A          8 μs                Identity
+     B          17 μs               Identity
+     C          21 μs               Altitude
+     D          25 μs               Undefined
+     S          3.5 μs              Multipurpose 
+
+Principle of Operation: 
+    The radar antenna rotates (usually at 5-12 rpm) and transmits a pulse which is received by the onboard equipment (transponder). The transponder sends back a reply containing at least a code (if operating in Mode A) but more often this is combined with level (mode C) or other information, e.g. aircraft identification, selected level, etc. (Mode S). The information received depends on the interrogation mode (A, C or S) and the transponder capability. For example, interrogation in Mode A will receive a reply in mode A even though the transponder may have Mode C or Mode S capability and an interrogation in Mode C will not trigger a response from a Mode A transponder. Typically, two Mode A interrogations are followed by a Mode C interrogation. The reason for using Mode A more frequently is that the identity of the aircraft (the SSR code) is of greater importance to the controller.
+
+Primary Radar: 
+    1. Principle:
+        - Primary radar works by emitting radio waves that bounce off objects (like aircraft) and return to the radar antenna. The time taken for the waves to return indicates the distance of the object.
+        - Does not require any equipment on the aircraft; it simply detects any object within its range.
+    2. Info: 
+        - Provides the position (range and bearing) of the object.
+        - Can track the movement of the object over time.
+    3. Limitations: 
+        - Cannot identify the aircraft or provide altitude information.
+        - Can pick up reflections from non-aircraft objects like birds, weather, and terrain, leading to potential clutter on the radar screen.
+    4. Usage: 
+        - Non-Cooperative Targets: Primary radar is essential for detecting objects that do not have transponders or are not equipped with SSR capabilities. This includes birds, weather phenomena, and other non-transponder-equipped aircraft or vehicles.
+        - Redundancy: Primary radar serves as a backup in case SSR systems experience technical issues or failures. It provides a basic level of surveillance that ensures continuous monitoring of airspace even if SSR is temporarily unavailable.
+        - Initial Detection: In areas where aircraft are entering or leaving radar coverage, primary radar can provide initial detection before SSR-equipped aircraft are within range. This helps air traffic controllers to anticipate and manage traffic flow.
+        - Wide Area Coverage: Primary radar typically has a longer range compared to SSR, making it suitable for wide-area surveillance, especially in remote or oceanic regions where SSR coverage may be limited or non-existent.
