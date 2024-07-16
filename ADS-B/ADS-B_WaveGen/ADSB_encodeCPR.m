@@ -1,43 +1,82 @@
-function [msg_even, msg_odd] = ADSB_encodeCPR(lat, lon, alt_ft)
+function [lat, lon, alt] = ADSB_encodeCPR(message, ref_lat, ref_lon)
+    % Decode ADS-B airborne position message
+    % Inputs:
+    %   message: 14-character hex string (56-bit ME field)
+    %   ref_lat: Reference latitude in degrees
+    %   ref_lon: Reference longitude in degrees
+    % Outputs:
+    %   lat: Decoded latitude in degrees
+    %   lon: Decoded longitude in degrees
+    %   alt: Decoded altitude in feet
+
     % Constants
     NZ = 15;
 
-    % Encode altitude
-    N = floor((alt_ft + 1000) / 100);
-    alt_enc = bitor(N, 2^7);  % Set Q-bit to 1
+    % Convert hex to binary
+    bin = hexToBinaryVector(message, 56);
 
-    % CPR encoding
-    lat_even = mod(floor(lat * 2^17 / 360 + 0.5), 2^17);
-    lon_even = mod(floor(lon * 2^17 / 360 + 0.5), 2^17);
-    
-    lat_odd = mod(floor(lat * 2^17 / 360 - floor(lat / 6) + 0.5), 2^17);
-    lon_odd = mod(floor(lon * 2^17 / 360 - floor(lon / 6) + 0.5), 2^17);
+    % Extract fields
+    tc = bin2dec(char(bin(1:5) + '0'));
+    alt_bits = [bin(9:20) bin(22)];
+    lat_cpr = bin2dec(char(bin(23:39) + '0')) / 2^17;
+    lon_cpr = bin2dec(char(bin(40:56) + '0')) / 2^17;
+    odd = bin(22);
 
-    % Compose messages
-    tc = 11;  % Type code for airborne position
-    msg_even = composeMessage(tc, alt_enc, 0, lat_even, lon_even);
-    msg_odd = composeMessage(tc, alt_enc, 1, lat_odd, lon_odd);
+    % Decode altitude
+    alt = decodeAltitude(alt_bits);
+
+    % Decode latitude
+    dlat = 360 / (4 * NZ - odd);
+    j = floor(ref_lat / dlat) + ...
+        floor(0.5 + mod(ref_lat, dlat) / dlat - lat_cpr);
+    lat = dlat * (j + lat_cpr);
+
+    % Decode longitude
+    nl = NL(lat);
+    if odd
+        ni = max(nl - 1, 1);
+    else
+        ni = max(nl, 1);
+    end
+    dlon = 360 / ni;
+    m = floor(ref_lon / dlon) + ...
+        floor(0.5 + mod(ref_lon, dlon) / dlon - lon_cpr);
+    lon = dlon * (m + lon_cpr);
+
+    % Adjust latitude and longitude to correct range
+    if lat > 90
+        lat = lat - 360;
+    end
+    if lon > 180
+        lon = lon - 360;
+    end
 end
 
-function msg = composeMessage(TC, ALT, F, LAT_CPR, LON_CPR)
-    % Compose ADS-B message part (56 bits)
-    msg = uint64(0);
-    
-    % Type Code (5 bits)
-    msg = bitor(msg, bitshift(uint64(TC), 51));
-    
-    % Altitude (12 bits)
-    msg = bitor(msg, bitshift(uint64(ALT), 39));
-    
-    % F bit
-    msg = bitor(msg, bitshift(uint64(F), 38));
-    
-    % LAT_CPR (17 bits)
-    msg = bitor(msg, bitshift(uint64(LAT_CPR), 21));
-    
-    % LON_CPR (17 bits)
-    msg = bitor(msg, uint64(LON_CPR));
-    
-    % Convert to hex string
-    msg = sprintf('%014X', msg);
+function alt = decodeAltitude(alt_bits)
+    % Decode altitude
+    if alt_bits(end) == 1  % Q-bit set
+        n = bin2dec(char(alt_bits(1:11) + '0'));
+        alt = 25 * n - 1000;
+    else
+        % Implement Gillham code decoding here if needed
+        alt = NaN;
+    end
+end
+
+function nl = NL(lat)
+    % Calculate the number of longitude zones
+    if abs(lat) >= 87
+        nl = 1;
+    elseif abs(lat) >= 85
+        nl = 2;
+    elseif abs(lat) >= 80
+        nl = 3;
+    elseif abs(lat) >= 75
+        nl = 4;
+    elseif abs(lat) >= 70
+        nl = 5;
+    else
+        nz = 15;
+        nl = floor(2*pi / acos(1 - (1-cos(pi/(2*nz))) / (cos(pi/180 * lat)^2)));
+    end
 end
