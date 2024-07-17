@@ -1,82 +1,46 @@
-function [lat, lon, alt] = ADSB_encodeCPR(message, ref_lat, ref_lon)
-    % Decode ADS-B airborne position message
-    % Inputs:
-    %   message: 14-character hex string (56-bit ME field)
-    %   ref_lat: Reference latitude in degrees
-    %   ref_lon: Reference longitude in degrees
-    % Outputs:
-    %   lat: Decoded latitude in degrees
-    %   lon: Decoded longitude in degrees
-    %   alt: Decoded altitude in feet
-
+function [me0, me1] = encodeADSBPosition(latitude, longitude)
     % Constants
     NZ = 15;
 
-    % Convert hex to binary
-    bin = hexToBinaryVector(message, 56);
-
-    % Extract fields
-    tc = bin2dec(char(bin(1:5) + '0'));
-    alt_bits = [bin(9:20) bin(22)];
-    lat_cpr = bin2dec(char(bin(23:39) + '0')) / 2^17;
-    lon_cpr = bin2dec(char(bin(40:56) + '0')) / 2^17;
-    odd = bin(22);
-
-    % Decode altitude
-    alt = decodeAltitude(alt_bits);
-
-    % Decode latitude
-    dlat = 360 / (4 * NZ - odd);
-    j = floor(ref_lat / dlat) + ...
-        floor(0.5 + mod(ref_lat, dlat) / dlat - lat_cpr);
-    lat = dlat * (j + lat_cpr);
-
-    % Decode longitude
-    nl = NL(lat);
-    if odd
-        ni = max(nl - 1, 1);
-    else
-        ni = max(nl, 1);
+    % Calculate CPR latitude and longitude
+    lat_cpr0 = mod(latitude, dlat0) / dlat0;
+    lat_cpr1 = mod(latitude, dlat1) / dlat1;
+    
+    NL = calculateNL(latitude);
+    if NL < 1
+        NL = 1;
     end
-    dlon = 360 / ni;
-    m = floor(ref_lon / dlon) + ...
-        floor(0.5 + mod(ref_lon, dlon) / dlon - lon_cpr);
-    lon = dlon * (m + lon_cpr);
+    dlon = 360 / NL;
+    
+    lon_cpr0 = mod(longitude, dlon) / dlon;
+    lon_cpr1 = mod(longitude, dlon) / dlon;
 
-    % Adjust latitude and longitude to correct range
-    if lat > 90
-        lat = lat - 360;
-    end
-    if lon > 180
-        lon = lon - 360;
-    end
-end
+    % Convert to binary
+    lat_cpr0_bin = dec2bin(round(lat_cpr0 * 2^17), 17);
+    lon_cpr0_bin = dec2bin(round(lon_cpr0 * 2^17), 17);
+    lat_cpr1_bin = dec2bin(round(lat_cpr1 * 2^17), 17);
+    lon_cpr1_bin = dec2bin(round(lon_cpr1 * 2^17), 17);
 
-function alt = decodeAltitude(alt_bits)
-    % Decode altitude
-    if alt_bits(end) == 1  % Q-bit set
-        n = bin2dec(char(alt_bits(1:11) + '0'));
-        alt = 25 * n - 1000;
-    else
-        % Implement Gillham code decoding here if needed
-        alt = NaN;
-    end
-end
+    % Construct ME fields (56 bits each)
+    me0 = ['00011' lat_cpr0_bin lon_cpr0_bin];
+    me1 = ['00011' lat_cpr1_bin lon_cpr1_bin];
 
-function nl = NL(lat)
-    % Calculate the number of longitude zones
-    if abs(lat) >= 87
-        nl = 1;
-    elseif abs(lat) >= 85
-        nl = 2;
-    elseif abs(lat) >= 80
-        nl = 3;
-    elseif abs(lat) >= 75
-        nl = 4;
-    elseif abs(lat) >= 70
-        nl = 5;
-    else
-        nz = 15;
-        nl = floor(2*pi / acos(1 - (1-cos(pi/(2*nz))) / (cos(pi/180 * lat)^2)));
+    % Helper functions
+    function NL = calculateNL(lat)
+        if abs(lat) >= 87
+            NL = 2;
+        elseif lat == 0
+            NL = 59;
+        else
+            NL = floor(2*pi / (acos(1 - (1-cos(pi/(2*NZ))) / (cos(pi/180*abs(lat))^2))));
+        end
+    end
+
+    function dlat = dlat0()
+        dlat = 360 / (4 * NZ);
+    end
+
+    function dlat = dlat1()
+        dlat = 360 / (4 * NZ - 1);
     end
 end
