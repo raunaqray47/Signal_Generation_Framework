@@ -1,6 +1,6 @@
 % To decode position
-%msg0 = '8D40621D58C382D690C8AC2863A7';
-%msg1 = '8D40621D58C386435CC412692AD6';
+%msg0 = '8D 40621D 58C382D690C8AC 2863A7';
+%msg1 = '8D 40621D 58C386435CC412 692AD6';
 %t0 = 1457996402;
 %t1 = 1457996400;
 %[latitude, longitude] = ADSB_decodeADSBPosition(msg0, msg1, t0, t1);
