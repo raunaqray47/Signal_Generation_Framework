@@ -1,13 +1,11 @@
 % To decode position
-%msg0 = '8D 40621D 58C382D690C8AC 2863A7';
-%msg1 = '8D 40621D 58C386435CC412 692AD6';
+%msg0 = '8D40621D 265862D690C8AC 2863A7';
+%msg1 = '8D40621D 26586241ECC8AC 692AD6';
 %t0 = 1457996402;
 %t1 = 1457996400;
-%[latitude, longitude] = ADSB_decodeADSBPosition(msg0, msg1, t0, t1);
-%disp(['Latitude: ', num2str(latitude), ' degrees']);
-%disp(['Longitude: ', num2str(longitude), ' degrees']);
+%ADSB_decode_airbornePosition(msg0, msg1, t0, t1)
 
-function [latitude, longitude] = ADSB_decodeADSBPosition(msg0, msg1, t0, t1)
+function [latitude, longitude, altitude] = ADSB_decode_airbornePosition(msg0, msg1, t0, t1)
     % Input validation
     if ~ischar(msg0) || ~ischar(msg1) || length(msg0) ~= 28 || length(msg1) ~= 28
         error('Invalid message format');
@@ -16,6 +14,10 @@ function [latitude, longitude] = ADSB_decodeADSBPosition(msg0, msg1, t0, t1)
     % Extract ME field (bits 33-88)
     me0 = hex2bin(msg0(9:22));
     me1 = hex2bin(msg1(9:22));
+
+    % Extract altitude
+    alt0 = decodeAltitude(me0(1:12));
+    alt1 = decodeAltitude(me1(1:12));
 
     % Extract CPR latitude and longitude
     lat_cpr0 = bin2dec(me0(23:39)) / 131072;  % 2^17
@@ -45,12 +47,15 @@ function [latitude, longitude] = ADSB_decodeADSBPosition(msg0, msg1, t0, t1)
         % Cannot decode, return NaN
         longitude = NaN;
         latitude = NaN;
+        altitude = NaN;
     else
-        % Choose most recent latitude
+        % Choose most recent latitude and altitude
         if t0 >= t1
             lat = lat0;
+            alt = alt0;
         else
             lat = lat1;
+            alt = alt1;
         end
 
         % Compute longitude index
@@ -75,6 +80,15 @@ function [latitude, longitude] = ADSB_decodeADSBPosition(msg0, msg1, t0, t1)
             latitude = lat1;
         end
     end
+
+    % Return the most recent altitude
+    altitude = alt;
+end
+
+function altitude = decodeAltitude(alt_bin)
+    % Decode altitude from binary
+    N = bin2dec(alt_bin);
+    altitude = N * 25 - 1000; % Convert to feet
 end
 
 function binary = hex2bin(hex)

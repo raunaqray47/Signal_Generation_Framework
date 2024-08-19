@@ -1,4 +1,4 @@
-function [message0, message1, mostRecent] = ADSB_encode_airbornePosition(latitude, longitude, altitude, t0, t1, typeCode, surveillanceStatus, singleAntennaFlag, DF, CA, ICAO)
+function [message0, message1, mostRecent] = ADSB_encode_airbornePosition_withCRC(latitude, longitude, altitude, t0, t1, typeCode, surveillanceStatus, singleAntennaFlag, DF, CA, ICAO)
     % Constants
     NZ = 15;
     
@@ -38,9 +38,11 @@ function [message0, message1, mostRecent] = ADSB_encode_airbornePosition(latitud
     me0_hex = bin2hex(me0);
     me1_hex = bin2hex(me1);
     
-    % Combine DF and CA into a single byte and convert to hex
-    DFCA_bin = [dec2bin(DF, 5) dec2bin(CA, 3)];
-    DFCA_hex = dec2hex(bin2dec(DFCA_bin), 2); % Convert to 2-digit hex
+    % Convert DF and CA from decimal to binary and then to hex
+    DF_bin = dec2bin(DF, 5);
+    CA_bin = dec2bin(CA, 3);
+    DFCA_bin = [DF_bin CA_bin];
+    DFCA_hex = bin2hex(DFCA_bin);
     
     % Construct the full message with DF, CA, and ICAO
     message0 = [DFCA_hex ICAO me0_hex];
@@ -119,3 +121,22 @@ function [remainder_bin, remainder_hex] = ADSB_CRC(data_hex)
     % Convert the binary remainder to a hexadecimal string
     remainder_hex = dec2hex(bin2dec(remainder_bin), 6);
 end
+
+% Example usage
+latitude = 37.7749;   % Example latitude for San Francisco
+longitude = -122.4194; % Example longitude for San Francisco
+altitude = 30000;     % Example altitude in feet
+t0 = 1457996402;      % Example timestamp
+t1 = 1457996400;      % Example timestamp
+typeCode = 19;        % Example type code
+surveillanceStatus = 0; % Example surveillance status
+singleAntennaFlag = 1; % Example single antenna flag
+DF = 17;              % Example Downlink Format in decimal
+CA = 5;               % Example Capability in decimal
+ICAO = '40621D';      % Example ICAO address in hex
+
+[message0, message1, mostRecent] = ADSB_encode_airbornePosition_withCRC(latitude, longitude, altitude, t0, t1, typeCode, surveillanceStatus, singleAntennaFlag, DF, CA, ICAO);
+
+disp(['Message 0: ', message0]);
+disp(['Message 1: ', message1]);
+disp(mostRecent);
