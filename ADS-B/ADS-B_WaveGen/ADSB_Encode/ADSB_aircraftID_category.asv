@@ -17,8 +17,6 @@ function ADSB_aircraftID_category(DF, CA, ICAO_hex, type_code, category, aircraf
 
     % Convert Aircraft Identification characters to binary
     aircraft_id_bin = '';
-    % Pad the aircraft ID with spaces if it's less than 8 characters
-    aircraft_id = pad(aircraft_id, 8, 'right', ' ');
     for i = 1:length(aircraft_id)
         aircraft_id_bin = [aircraft_id_bin charToBinary6bit(aircraft_id(i))];
     end
@@ -29,30 +27,40 @@ function ADSB_aircraftID_category(DF, CA, ICAO_hex, type_code, category, aircraf
     % Concatenate all parts to form the complete ADS-B message
     ADS_B_complete = [ADS_B_message ICAO_bin payload_bin];
 
-    % Check the length of the binary message
-    disp(['Length of ADS-B message (binary): ', num2str(length(ADS_B_complete))]);
+    % Calculate CRC parity
+    generator_poly = hex2bin('1FFF409', 25); % 24-bit CRC with 25-bit generator
+    parity_bits = calculateCRC(ADS_B_complete, generator_poly);
+
+    % Append parity bits to the ADS-B message
+    ADS_B_with_parity = [ADS_B_complete parity_bits];
 
     % Plot the complete ADS-B message bits
     figure;
-    stem(0:length(ADS_B_complete)-1, ADS_B_complete - '0', 'filled');
+    stem(0:length(ADS_B_with_parity)-1, ADS_B_with_parity - '0', 'filled');
     ylim([-0.5, 1.5]);
     grid on;  
-    title('ADS-B Aircraft Identification and Category Message Bits');
+    title('ADS-B Aircraft Identification and Category Message Bits with Parity');
     xlabel('Bit Position');
     ylabel('Bit Value');
 
     % Display the final ADS-B message in binary
-    disp('Final ADS-B Aircraft Identification and Category Message (Binary):');
-    disp(ADS_B_complete);
+    disp('Final ADS-B Message with Parity (Binary):');
+    disp(ADS_B_with_parity);
 
     % Convert binary string to hexadecimal manually
-    ADS_B_hex_final = binaryToHexManual(ADS_B_complete);
+    ADS_B_hex_final = binaryToHexManual(ADS_B_with_parity);
 
-    disp('Final ADS-B Aircraft Identification and Category Message (Hexadecimal):');
+    disp('Final ADS-B Message with Parity (Hexadecimal):');
     disp(ADS_B_hex_final);
 
+    % Display the parity bits in binary and hexadecimal
+    disp('Parity Bits (Binary):');
+    disp(parity_bits);
+    disp('Parity Bits (Hexadecimal):');
+    disp(binaryToHexManual(parity_bits));
+
     % Generate PPM encoded signal
-    [ppm_signal, time_axis] = generatePPM(ADS_B_complete);
+    [ppm_signal, time_axis] = generatePPM(ADS_B_with_parity);
 
     % Plot PPM encoded signal
     figure;
@@ -67,6 +75,25 @@ function ADSB_aircraftID_category(DF, CA, ICAO_hex, type_code, category, aircraf
     outputPath = 'C:\Users\rauna\OneDrive - UW\Study\Project\Summer_Internship\ADS-B\ADS-B_WaveGen\ADSB_Encode\CSV\ppm_signal.txt';
     writematrix([time_axis', ppm_signal'], outputPath, 'Delimiter', 'tab');
     disp(['PPM signal saved to: ', outputPath]);
+end
+
+function parity_bits = calculateCRC(message, generator_poly)
+    % Append 24 zero bits to the message
+    message = [message, repmat('0', 1, 24)];
+    message = message - '0'; % Convert to numeric array
+
+    % Convert generator polynomial to numeric array
+    generator = generator_poly - '0';
+
+    % Perform CRC division
+    for i = 1:length(message) - 24
+        if message(i) == 1
+            message(i:i+24) = xor(message(i:i+24), generator);
+        end
+    end
+
+    % Extract the last 24 bits as parity bits
+    parity_bits = message(end-23:end) + '0'; % Convert back to char array
 end
 
 function char_bin = charToBinary6bit(char)
