@@ -1,4 +1,4 @@
-function ADSB_aircraftID_category(DF, CA, ICAO_hex, type_code, category, aircraft_id)
+function aircraftIDmessage(DF, CA, ICAO_hex, type_code, category, aircraft_id)
     % Generate ADS-B message for Aircraft Identification and Category, plot, and show PPM encoding
     
     % Convert DF and CA to binary
@@ -57,6 +57,11 @@ function ADSB_aircraftID_category(DF, CA, ICAO_hex, type_code, category, aircraf
     title('PPM Encoded ADS-B Message');
     xlabel('Time (μs)');
     ylabel('Amplitude');
+    
+    % Save PPM signal to specified text file
+    outputPath = 'C:\Users\rauna\OneDrive - UW\Study\Project\Summer_Internship\ADS-B\ADS-B_WaveGen\ADSB_Encode\CSV\ppm_signal.txt';
+    writematrix([time_axis', ppm_signal'], outputPath, 'Delimiter', 'tab');
+    disp(['PPM signal saved to: ', outputPath]);
 end
 
 function char_bin = charToBinary6bit(char)
