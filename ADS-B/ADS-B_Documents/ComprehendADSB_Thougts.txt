@@ -13,3 +13,26 @@ ADSB Message Structure -
 
 2. CA - Capability
 	-  
+
+
+DF = 17;
+CA = 5;
+ICAO_hex = '4840D6';
+type_code = 4;
+category = 0;
+aircraft_id = 'KLM1023';
+ADSB_aircraftID_category(DF, CA, ICAO_hex, type_code, category, aircraft_id)
+
+
+latitude = 52.2572;
+longitude = 3.91937;
+altitude = 38000;
+t0 = 1457996402;
+t1 = 1457996400;
+typeCode = 19;
+surveillanceStatus = 0;
+singleAntennaFlag = 1;
+DF = 17;
+CA = 5;
+ICAO = '40621D';
+[message0, message1, mostRecent] = ADSB_encode_airbornePosition(latitude, longitude, altitude, t0, t1, typeCode, surveillanceStatus, singleAntennaFlag, DF, CA, ICAO)
