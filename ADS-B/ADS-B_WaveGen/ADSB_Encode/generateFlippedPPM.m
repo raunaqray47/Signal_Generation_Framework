@@ -14,6 +14,12 @@ function generateFlippedPPM(ADS_B_hex_final)
     xlabel('Time (μs)');
     ylabel('Amplitude');
 
+    % Display the original ADS-B message
+    disp('Original ADS-B Message (Hex):');
+    disp(ADS_B_hex_final);
+    disp('Original ADS-B Message (Binary):');
+    disp(ADS_B_with_parity);
+
     % Flip the bits in the binary message
     flipped_message = '';
     for i = 1:length(ADS_B_with_parity)
@@ -30,11 +36,6 @@ function generateFlippedPPM(ADS_B_hex_final)
     % Display the flipped binary message
     disp('Flipped ADS-B Message (Binary):');
     disp(flipped_message);
-
-    % Convert flipped binary message to hexadecimal
-    flipped_hex = binaryToHexManual(flipped_message);
-    disp('Flipped ADS-B Message (Hexadecimal):');
-    disp(flipped_hex);
 
     % Plot flipped PPM encoded signal
     figure;
@@ -74,22 +75,6 @@ function [ppm_signal, time_axis] = generatePPM(binary_message)
     
     % Generate time axis
     time_axis = (0:length(ppm_signal)-1) / samples_per_second;
-end
-
-function hex_str = binaryToHexManual(bin_str)
-    hex_str = '';
-    for i = 1:4:length(bin_str)
-        nibble = bin_str(i:min(i+3, length(bin_str)));
-        if length(nibble) < 4
-            nibble = [nibble, repmat('0', 1, 4-length(nibble))];
-        end
-        dec_val = sum(2.^(3:-1:0) .* (nibble == '1'));
-        if dec_val < 10
-            hex_str = [hex_str, char(dec_val + '0')];
-        else
-            hex_str = [hex_str, char(dec_val - 10 + 'A')];
-        end
-        end
 end
 
 function bin_vector = hexToBinaryVector(hex_str, num_bits)
