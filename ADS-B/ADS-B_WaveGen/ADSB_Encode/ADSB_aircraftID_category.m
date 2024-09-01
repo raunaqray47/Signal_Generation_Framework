@@ -1,3 +1,24 @@
+% Generates an ADS-B message for aircraft identification and category.
+% It constructs the message, calculates CRC parity bits, appends them, and generates a Pulse Position Modulation (PPM) encoded signal.
+% The function displays the ADS-B message in hexadecimal format (with and without parity) and saves the PPM signal to a text file.
+% Input:
+% DF = 17;
+% CA = 5;
+% ICAO_hex = 'ABCDEF';
+% type_code = 4;
+% category = 1;
+% aircraft_id = 'N12345';
+% ADSB_aircraftID_category(DF, CA, ICAO_hex, type_code, category, aircraft_id);
+% Output:
+% ADS-B Message without Parity (Hexadecimal):
+% 8DABCDEF4841502020202020
+% Parity Bits (Hexadecimal):
+% F1B562
+% Final ADS-B Message with Parity (Hexadecimal):
+% 8DABCDEF4841502020202020F1B562
+% PPM signal saved to: C:\Users\rauna\OneDrive - UW\Study\Project\Summer_Internship\ADS-B\ADS-B_WaveGen\ADSB_Encode\CSV\ppm_signal.txt
+
+
 function ADSB_aircraftID_category(DF, CA, ICAO_hex, type_code, category, aircraft_id)
     % Generate ADS-B message for Aircraft Identification and Category
     
