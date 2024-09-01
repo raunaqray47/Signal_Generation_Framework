@@ -1,3 +1,5 @@
+% Calculates the Cyclic Redundancy Check (CRC) for ADS-B messages. 
+% It takes a hexadecimal input, converts it to binary, performs polynomial division using a specific generator polynomial, and outputs the 24-bit CRC in both binary and hexadecimal formats.
 function [remainder_bin, remainder_hex] = ADSB_CRC(data_hex)
     % Define the generator in binary format
     generator_bin = '1111111111111010000001001';
