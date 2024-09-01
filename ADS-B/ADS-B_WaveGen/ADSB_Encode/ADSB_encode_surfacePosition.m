@@ -1,3 +1,23 @@
+% Encodes surface position information into an ADS-B message.
+% Generates the Message (ME) field for surface position reports using Compact Position Reporting (CPR) encoding.
+%
+% Inputs:
+% latitude = 52.2572;
+% longitude = 3.91937;
+% speed = 10;  % knots
+% track = 45;  % degrees
+% t = 0;       % time flag
+% me_hex = ADSB_encode_surfacePosition(latitude, longitude, speed, track, t);
+%
+% Output:
+% me_hex: '2C1400B4E1C0C4F8'
+%
+% Note: The actual output may vary slightly due to rounding in floating-point calculations.
+% Note_Self: This function encodes only the ME field. Yet to create a complete ADS-B message. 
+% Prepend the Downlink Format (DF), Capability (CA), and ICAO address, and append the CRC to this ME field.
+% Verification Pending
+
+
 function [me_hex] = ADSB_encode_surfacePosition(latitude, longitude, speed, track, t)
     % Constants
     NZ = 15;

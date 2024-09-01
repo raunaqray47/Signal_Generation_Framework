@@ -1,3 +1,31 @@
+% Encodes airborne position information into ADS-B messages.
+% Generates two messages (ME0 and ME1) with Compact Position Reporting (CPR) encoding.
+% Calculates CRC for each message and determines the most recent message based on timestamps.
+%
+% Inputs:
+% latitude = 52.2572;
+% longitude = 3.91937;
+% altitude = 38000;
+% t0 = 1457996402;
+% t1 = 1457996400;
+% typeCode = 19;
+% surveillanceStatus = 0;
+% singleAntennaFlag = 1;
+% DF = 17;
+% CA = 5;
+% ICAO = '40621D';
+% [message0, message1, mostRecent] = ADSB_encode_airbornePosition(latitude, longitude, altitude, t0, t1, typeCode, surveillanceStatus, singleAntennaFlag, DF, CA, ICAO)
+%
+% Outputs:
+% message0: '8D40621D265862D690C8ACF9EA27'
+% message1: '8D40621D26586241ECC8ACDF67B5'
+% mostRecent: 'ME0 is the most recent message'
+%
+% The function returns two complete ADS-B messages in hexadecimal format (28 characters each)
+% and indicates which message is the most recent based on the provided timestamps.
+% Self_Note: Check altitude encoding.
+
+
 function [message0, message1, mostRecent] = ADSB_encode_airbornePosition(latitude, longitude, altitude, t0, t1, typeCode, surveillanceStatus, singleAntennaFlag, DF, CA, ICAO)
     % Constants
     NZ = 15;

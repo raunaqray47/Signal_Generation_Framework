@@ -1,3 +1,23 @@
+% Generates and compares original and bit-flipped PPM encoded ADS-B messages.
+% It takes a hexadecimal ADS-B message, converts it to binary, generates PPM signals for both the original and bit-flipped messages, plots them,
+% and saves the flipped PPM signal to a text file.
+% Input:
+% ADS_B_hex_final = '8D4840D6202CC371C32CE0576098';
+% generateFlippedPPM(ADS_B_hex_final);
+% Output:
+% Original ADS-B Message (Hex):
+% 8D4840D6202CC371C32CE0576098
+% Original ADS-B Message (Binary):
+% 10001101010010000100000011010110001000000010110011000011011100011100...
+% Flipped ADS-B Message (Binary):
+% 01110010101101111011111100101001110111111101001100111100100011000011...
+% Flipped PPM signal saved to: C:\Users\rauna\OneDrive - UW\Study\Project\Summer_Internship\ADS-B\ADS-B_WaveGen\ADSB_Encode\CSV\flipped_ppm_signal.txt
+%
+% The function also generates two figures:
+% 1. Original PPM Encoded ADS-B Message
+% 2. Flipped PPM Encoded ADS-B Message
+
+
 function generateFlippedPPM(ADS_B_hex_final)
     % Convert the final ADS-B message to binary
     ADS_B_with_parity = hexToBinaryVector(ADS_B_hex_final, 112);

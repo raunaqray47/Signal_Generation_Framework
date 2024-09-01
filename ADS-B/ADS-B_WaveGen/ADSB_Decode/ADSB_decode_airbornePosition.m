@@ -1,9 +1,20 @@
-% To decode position
-%msg0 = '8D40621D 265862D690C8AC 2863A7';
-%msg1 = '8D40621D 26586241ECC8AC 692AD6';
-%t0 = 1457996402;
-%t1 = 1457996400;
-%ADSB_decode_airbornePosition(msg0, msg1, t0, t1)
+% Decodes airborne position information from two ADS-B messages (even and odd frames).
+% Uses Compact Position Reporting (CPR) to determine latitude, longitude, and altitude.
+%
+%Input:
+%msg0 = '8D40621D265862D690C8ACF9EA27'; %Even Frame
+%msg1 = '8D40621D26586241ECC8ACDF67B5'; %Odd Frame
+%t0 = 1457996402; Timestamp for even message
+%t1 = 1457996400; Timestamp for odd message
+%[latitude, longitude, altitude] = ADSB_decode_airbornePosition(msg0, msg1, t0, t1)
+%
+% Outputs:
+% latitude:  52.2572
+% longitude: 3.9194
+% altitude:  38000
+% Note: Output may vary slightly due to precision in floating-point calculations.
+% If messages are incompatible or decoding fails, the function returns NaN values.
+% Self_Note: Check altitude decoding.
 
 function [latitude, longitude, altitude] = ADSB_decode_airbornePosition(msg0, msg1, t0, t1)
     % Input validation
