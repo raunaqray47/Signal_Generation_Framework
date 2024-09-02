@@ -13,7 +13,7 @@
 % me_hex: '2C1400B4E1C0C4F8'
 %
 % Note: The actual output may vary slightly due to rounding in floating-point calculations.
-% Note_Self: This function encodes only the ME field. Yet to create a complete ADS-B message. 
+% Self_note: This function encodes only the ME field. Yet to create a complete ADS-B message. 
 % Prepend the Downlink Format (DF), Capability (CA), and ICAO address, and append the CRC to this ME field.
 % Verification Pending
 

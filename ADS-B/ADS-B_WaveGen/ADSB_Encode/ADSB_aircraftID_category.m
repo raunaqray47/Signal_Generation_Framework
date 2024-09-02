@@ -11,11 +11,11 @@
 % ADSB_aircraftID_category(DF, CA, ICAO_hex, type_code, category, aircraft_id);
 % Output:
 % ADS-B Message without Parity (Hexadecimal):
-% 8DABCDEF4841502020202020
+% 8D4840D6202CC371C32CE0
 % Parity Bits (Hexadecimal):
 % F1B562
 % Final ADS-B Message with Parity (Hexadecimal):
-% 8DABCDEF4841502020202020F1B562
+% 8D4840D6202CC371C32CE0576098
 % PPM signal saved to: C:\Users\rauna\OneDrive - UW\Study\Project\Summer_Internship\ADS-B\ADS-B_WaveGen\ADSB_Encode\CSV\ppm_signal.txt
 
 
