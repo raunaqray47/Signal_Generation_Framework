@@ -1,3 +1,4 @@
+function [decoded_hex, decoded_binary] = decodePPM(file_path)
 % decodePPM - Decode Pulse Position Modulation (PPM) signal from a text file
 %
 % This function reads a PPM signal from a text file, plots the original waveform,
@@ -21,8 +22,6 @@
 %   file_path = 'C:\Users\rauna\OneDrive - UW\Study\Project\Summer_Internship\ADS-B\ADS-B_WaveGen\PPM\CSV\ppm_signal.txt';
 %   [decoded_hex, decoded_binary] = decodePPM(file_path);
 
-function [decoded_hex, decoded_binary] = decodePPM(file_path)
-
     % Read the PPM signal from the text file
     data = readmatrix(file_path);
     time = data(:, 1);
@@ -43,16 +42,24 @@ function [decoded_hex, decoded_binary] = decodePPM(file_path)
     threshold = 0.5;
     decoded_binary = [];
 
-    for i = 1:bit_duration:max(time)
-        sample_indices = find(time >= i & time < i + bit_duration);
-        if any(ppm_signal(sample_indices) > threshold)
-            if mean(time(sample_indices)) - i > bit_duration/2
+    num_bits = floor(max(time) / bit_duration);
+    for bit_index = 0:num_bits-1
+        start_time = bit_index * bit_duration;
+        end_time = (bit_index + 1) * bit_duration;
+        sample_indices = find(time >= start_time & time < end_time);
+        if ~isempty(sample_indices) && any(ppm_signal(sample_indices) > threshold)
+            if mean(time(sample_indices(ppm_signal(sample_indices) > threshold))) - start_time > bit_duration/2
                 decoded_binary = [decoded_binary 1];
             else
                 decoded_binary = [decoded_binary 0];
             end
+        else
+            decoded_binary = [decoded_binary 0];
         end
     end
+
+    % Ensure decoded_binary is a row vector
+    decoded_binary = decoded_binary(:)';
 
     % Convert binary to hexadecimal
     padded_binary = [decoded_binary zeros(1, mod(-length(decoded_binary), 4))];
@@ -60,11 +67,12 @@ function [decoded_hex, decoded_binary] = decodePPM(file_path)
 
     % Plot the decoded binary data
     subplot(2,1,2);
-    stairs(1:length(decoded_binary), decoded_binary);
+    stairs(0:length(decoded_binary)-1, decoded_binary);
     title('Decoded Binary Data');
     xlabel('Bit Index');
     ylabel('Bit Value');
     ylim([-0.5 1.5]);
+    xlim([0 length(decoded_binary)]);
     grid on;
 
     % Display results
