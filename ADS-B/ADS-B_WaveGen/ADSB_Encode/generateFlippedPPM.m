@@ -5,22 +5,21 @@
 % hex_value = '8D4840D6202CC371C32CE0576098';
 % generateFlippedPPM(hex_value);
 % Output:
-% Original ADS-B Message (Hex):
+% Original PPM Encoded Message (Hex):
 % 8D4840D6202CC371C32CE0576098
-% Original ADS-B Message (Binary):
+% Original PPM Encoded Message (Binary):
 % 10001101010010000100000011010110001000000010110011000011011100011100...
-% Flipped ADS-B Message (Binary):
+% Flipped PPM Encoded Message (Binary):
 % 01110010101101111011111100101001110111111101001100111100100011000011...
-% Flipped PPM signal saved to: C:\Users\rauna\OneDrive - UW\Study\Project\Summer_Internship\ADS-B\ADS-B_WaveGen\ADSB_Encode\CSV\flipped_ppm_signal.txt
+% Flipped PPM signal saved to: C:\Users\rauna\OneDrive - UW\Study\Project\Summer_Internship\ADS-B\ADS-B_WaveGen\PPM\CSV\flipped_ppm_signal.txt
 %
 % The function also generates two figures:
 % 1. Original PPM Encoded ADS-B Message
 % 2. Flipped PPM Encoded ADS-B Message
 
-
 function generateFlippedPPM(hex_value)
-    % Convert the final ADS-B message to binary
-    hex_message = hexToBinaryVector(hex_value, 112);
+    % Convert the hex message to binary
+    hex_message = hexToBinaryVector(hex_value);
 
     % Generate PPM encoded signal for the original message
     [ppm_signal, time_axis] = generatePPM(hex_message);
@@ -41,14 +40,7 @@ function generateFlippedPPM(hex_value)
     disp(hex_message);
 
     % Flip the bits in the binary message
-    flipped_message = '';
-    for i = 1:length(hex_message)
-        if hex_message(i) == '0'
-            flipped_message = [flipped_message '1'];
-        else
-            flipped_message = [flipped_message '0'];
-        end
-    end
+    flipped_message = char(bitxor(hex_message - '0', 1) + '0');
 
     % Generate PPM signal for the flipped message
     [flipped_ppm_signal, flipped_time_axis] = generatePPM(flipped_message);
@@ -97,7 +89,7 @@ function [ppm_signal, time_axis] = generatePPM(binary_message)
     time_axis = (0:length(ppm_signal)-1) / samples_per_second;
 end
 
-function bin_vector = hexToBinaryVector(hex_str, num_bits)
+function bin_vector = hexToBinaryVector(hex_str)
     bin_vector = '';
     for i = 1:length(hex_str)
         nibble = hex_str(i);
@@ -108,5 +100,4 @@ function bin_vector = hexToBinaryVector(hex_str, num_bits)
         end
         bin_vector = [bin_vector, bin_nibble];
     end
-    bin_vector = bin_vector(1:num_bits);
 end
