@@ -15,6 +15,12 @@ ADSB Message Structure -
 	-  
 
 
+
+
+
+ADSB_aicraftID_category.m - 
+
+INPUT:
 DF = 17;
 CA = 5;
 ICAO_hex = '4840D6';
@@ -23,7 +29,22 @@ category = 0;
 aircraft_id = 'KLM1023';
 ADSB_aircraftID_category(DF, CA, ICAO_hex, type_code, category, aircraft_id)
 
+OUTPUT:
+ADS-B Message without Parity (Hexadecimal):
+8D4840D6202CC371C32CE0
+Parity Bits (Hexadecimal):
+576098
+Final ADS-B Message with Parity (Hexadecimal):
+8D4840D6202CC371C32CE0576098
+PPM signal saved to: C:\Users\rauna\OneDrive - UW\Study\Project\Summer_Internship\ADS-B\ADS-B_WaveGen\ADSB_Encode\CSV\ppm_signal.txt
 
+END-----------------------------------------------------------------------------------------------------------------------------------
+
+
+
+ADSB_encode_airbornePosition.m - 
+
+INPUT:
 latitude = 52.2572;
 longitude = 3.91937;
 altitude = 38000;
@@ -36,3 +57,130 @@ DF = 17;
 CA = 5;
 ICAO = '40621D';
 [message0, message1, mostRecent] = ADSB_encode_airbornePosition(latitude, longitude, altitude, t0, t1, typeCode, surveillanceStatus, singleAntennaFlag, DF, CA, ICAO)
+
+OUTPUT:
+message0 =
+
+    '8D40621D265862D690C8ACF9EA27'
+
+
+message1 =
+
+    '8D40621D26586241ECC8ACDF67B5'
+
+
+mostRecent =
+
+    'ME0 is the most recent message'
+
+END-----------------------------------------------------------------------------------------------------------------------------------
+
+
+
+AES_Encryption.m and AES_Decryption.m- 
+
+INPUT:
+
+% Encrypt
+hex_input = '8D40621D265862D690C8ACF9EA27';
+[encrypted_hex, encryption_output] = AES_Encryption(hex_input);
+disp('Encryption Output:');
+disp(encryption_output);
+
+% Decrypt
+[decrypted_hex, decryption_output] = AES_Decryption(encrypted_hex);
+disp('Decryption Output:');
+disp(decryption_output);
+
+% Verify
+if strcmpi(hex_input, decrypted_hex)
+    disp('Encryption and decryption successful!');
+else
+    disp('Error: Decrypted result does not match original input.');
+    disp(['Original input: ', hex_input]);
+    disp(['Decrypted output: ', decrypted_hex]);
+end
+
+OUTPUT: 
+
+Encryption Output:
+Input Statistics:
+  Hex length: 28 characters
+  Byte length: 14 bytes
+Encryption Output:
+  Encrypted byte length: 16 bytes
+  Encrypted hex length: 32 characters
+
+Unencrypted (HEX): 8D40621D265862D690C8ACF9EA27
+Encrypted (HEX): F88EF4DFBEC26BC4F0B19446E32FEA6B
+Decryption Output:
+Input Statistics:
+  Encrypted hex length: 32 characters
+  Encrypted byte length: 16 bytes
+Decryption Output:
+  Decrypted byte length: 14 bytes
+  Decrypted hex length: 28 characters
+
+Encrypted (HEX): F88EF4DFBEC26BC4F0B19446E32FEA6B
+Decrypted (HEX): 8D40621D265862D690C8ACF9EA27
+Encryption and decryption successful!
+
+END-----------------------------------------------------------------------------------------------------------------------------------
+
+
+generatePPM.m - 
+
+INPUT: 
+
+hex_input = 'F88EF4DFBEC26BC4F0B19446E32FEA6B';
+[ppm_signal_encrypted, time_axis_encrypted] = generatePPM(hex_input);
+
+OUTPUT: 
+
+Hex Input:
+F88EF4DFBEC26BC4F0B19446E32FEA6B
+Binary Representation:
+1  1  1  1  1  0  0  0  1  0  0  0  1  1  1  0  1  1  1  1  0  1  0  0  1  1  0  1  1  1  1  1  1  0  1  1  1  1  1  0  1  1  0  0  0  0  1  0  0  1  1  0  1  0  1  1  1  1  0  0  0  1  0  0  1  1  1  1  0  0  0  0  1  0  1  1  0  0  0  1  1  0  0  1  0  1  0  0  0  1  0  0  0  1  1  0  1  1  1  0  0  0  1  1  0  0  1  0  1  1  1  1  1  1  1  0  1  0  1  0  0  1  1  0  1  0  1  1
+PPM signal saved to: C:\Users\rauna\OneDrive - UW\Study\Project\Summer_Internship\ADS-B\ADS-B_WaveGen\PPM\CSV\ppm_signal.txt
+
+END-----------------------------------------------------------------------------------------------------------------------------------
+
+
+generateFlippedPPM.m - 
+
+INPUT: 
+
+hex_value = 'F88EF4DFBEC26BC4F0B19446E32FEA6B';
+generateFlippedPPM(hex_value);
+
+OUTPUT: 
+
+Original ADS-B Message (Hex):
+F88EF4DFBEC26BC4F0B19446E32FEA6B
+Original ADS-B Message (Binary):
+1111100010001110111101001101111110111110110000100110101111000100111100001011000110010100010001101110001100101111
+Flipped ADS-B Message (Binary):
+0000011101110001000010110010000001000001001111011001010000111011000011110100111001101011101110010001110011010000
+Flipped PPM signal saved to: C:\Users\rauna\OneDrive - UW\Study\Project\Summer_Internship\ADS-B\ADS-B_WaveGen\ADSB_Encode\CSV\flipped_ppm_signal.txt
+
+
+END-----------------------------------------------------------------------------------------------------------------------------------
+
+decodePPM.m
+
+INPUT: 
+
+file_path = 'C:\Users\rauna\OneDrive - UW\Study\Project\Summer_Internship\ADS-B\ADS-B_WaveGen\PPM\CSV\ppm_signal.txt';
+[decoded_hex, decoded_binary] = decodePPM(file_path);
+
+OUTPUT: 
+
+Decoded Hexadecimal:
+F88EF4DFBEC26BC4F0B19446E32FEA6B
+Decoded Binary:
+1  1  1  1  1  0  0  0  1  0  0  0  1  1  1  0  1  1  1  1  0  1  0  0  1  1  0  1  1  1  1  1  1  0  1  1  1  1  1  0  1  1  0  0  0  0  1  0  0  1  1  0  1  0  1  1  1  1  0  0  0  1  0  0  1  1  1  1  0  0  0  0  1  0  1  1  0  0  0  1  1  0  0  1  0  1  0  0  0  1  0  0  0  1  1  0  1  1  1  0  0  0  1  1  0  0  1  0  1  1  1  1  1  1  1  0  1  0  1  0  0  1  1  0  1  0  1
+
+HexData   - F88EF4DFBEC26BC4F0B19446E32FEA6B
+HexOutput - 06600200003900320E0C4330188001
+F93FDFFFC5FCBC7364F9BFF7C0000000
+F93FDFFFC5FCBC7364F9BFF7C0000000
