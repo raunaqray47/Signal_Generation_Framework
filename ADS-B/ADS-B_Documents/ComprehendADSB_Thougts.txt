@@ -15,7 +15,7 @@ ADSB Message Structure -
 	-  
 
 
-
+END-----------------------------------------------------------------------------------------------------------------------------------
 
 
 ADSB_aicraftID_category.m - 
@@ -150,10 +150,11 @@ generateFlippedPPM.m -
 
 INPUT: 
 
-hex_value = 'F88EF4DFBEC26BC4F0B19446E32FEA6B';
+hex_value = 'F8';
 generateFlippedPPM(hex_value);
 
 OUTPUT: 
+
 
 Original ADS-B Message (Hex):
 F88EF4DFBEC26BC4F0B19446E32FEA6B
@@ -176,11 +177,60 @@ file_path = 'C:\Users\rauna\OneDrive - UW\Study\Project\Summer_Internship\ADS-B\
 OUTPUT: 
 
 Decoded Hexadecimal:
-F88EF4DFBEC26BC4F0B19446E32FEA6B
+Decoded Hexadecimal:
+F8
 Decoded Binary:
-1  1  1  1  1  0  0  0  1  0  0  0  1  1  1  0  1  1  1  1  0  1  0  0  1  1  0  1  1  1  1  1  1  0  1  1  1  1  1  0  1  1  0  0  0  0  1  0  0  1  1  0  1  0  1  1  1  1  0  0  0  1  0  0  1  1  1  1  0  0  0  0  1  0  1  1  0  0  0  1  1  0  0  1  0  1  0  0  0  1  0  0  0  1  1  0  1  1  1  0  0  0  1  1  0  0  1  0  1  1  1  1  1  1  1  0  1  0  1  0  0  1  1  0  1  0  1
+1  1  1  1  1  0  0  0
 
-HexData   - F88EF4DFBEC26BC4F0B19446E32FEA6B
-HexOutput - 06600200003900320E0C4330188001
-F93FDFFFC5FCBC7364F9BFF7C0000000
-F93FDFFFC5FCBC7364F9BFF7C0000000
+ans =
+
+    'F8'
+
+
+END-----------------------------------------------------------------------------------------------------------------------------------
+
+
+ADSB_encode_surfacePosition.m
+
+
+typeCode = 7; 			% Type code for surface position
+groundTrackStatus = 1; 	% Ground track status (1 for valid, 0 for invalid)
+movementSpeed = 15; 	% Speed in knots
+trackAngle = 45;		% Track angle in degrees
+latitude = 47.6062; 	% Latitude in degrees (example: Seattle, WA)
+longitude = -122.3321; 	% Longitude in degrees (example: Seattle, WA)
+refLat = 47.6097; 		% Reference latitude (example: Seattle, WA)
+refLon = -122.3331; 	% Reference longitude (example: Seattle, WA)
+t0 = 1631234567;	 	% Unix timestamp for even frame
+t1 = 1631234568; 		% Unix timestamp for odd frame (1 second later)
+DF = 17; 				% Downlink Format
+CA = 5; 				% Capability
+ICAO = 'A1B2C3'; 		% ICAO address (hexadecimal)
+
+[msg0, msg1, mostRecent] = ADSB_encode_surfacePosition(typeCode, groundTrackStatus, movementSpeed, trackAngle, latitude, longitude, refLat, refLon, t0, t1, DF, CA, ICAO)
+
+
+END-----------------------------------------------------------------------------------------------------------------------------------
+
+msg0 = '8DA1B2C328D902F32A0010135FCA';
+msg1 = '8DA1B2C328D908D584000E98E200';
+refLat = 47.5;
+refLon = -122.22;
+[decodedSpeed0, decodedTrackAngle0, decodedLat0, decodedLon0] = ADSB_decode_surfacePosition(msg0, refLat, refLon);
+[decodedSpeed1, decodedTrackAngle1, decodedLat1, decodedLon1] = ADSB_decode_surfacePosition(msg1, refLat, refLon);
+
+% Display results
+disp('Decoded Even Frame:');
+disp(['Speed: ', num2str(decodedSpeed0), ' knots']);
+disp(['Track Angle: ', num2str(decodedTrackAngle0), ' degrees']);
+disp(['Latitude: ', num2str(decodedLat0), ' degrees']);
+disp(['Longitude: ', num2str(decodedLon0), ' degrees']);
+
+disp('Decoded Odd Frame:');
+disp(['Speed: ', num2str(decodedSpeed1), ' knots']);
+disp(['Track Angle: ', num2str(decodedTrackAngle1), ' degrees']);
+disp(['Latitude: ', num2str(decodedLat1), ' degrees']);
+disp(['Longitude: ', num2str(decodedLon1), ' degrees']);
+
+
+END-----------------------------------------------------------------------------------------------------------------------------------

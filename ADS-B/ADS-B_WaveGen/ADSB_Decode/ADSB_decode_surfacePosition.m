@@ -1,106 +1,64 @@
-function [decodedSpeed, decodedTrackAngle, decodedLat, decodedLon] = ADSB_decode_surfacePosition(msg, refLat, refLon)
-    % Extract ME field from the message
-    ME = msg(9:22); % ME field is 56 bits (14 hex characters)
-    ME_bin = hexToBinaryVector(ME, 56);
+function decodedData = ADSB_decode_surfacePosition(msg0, msg1, t0, t1, refLat, refLon)
+    % Convert hex messages to binary strings
+    msg0_bin = hexToBinaryVector(msg0, length(msg0) * 4);
+    msg1_bin = hexToBinaryVector(msg1, length(msg1) * 4);
     
-    % Decode Type Code
-    typeCode = bin2dec(ME_bin(1:5));
-    if typeCode < 5 || typeCode > 8
-        error('Invalid type code for surface position message.');
-    end
+    % Convert binary vectors to character vectors
+    msg0_bin_str = char(msg0_bin + '0');
+    msg1_bin_str = char(msg1_bin + '0');
     
-    % Decode Movement Speed
-    movEnc = bin2dec(ME_bin(6:12));
-    decodedSpeed = decodeMovementSpeed(movEnc);
+    % Extract ME fields
+    ME0 = msg0_bin_str(33:88);
+    ME1 = msg1_bin_str(33:88);
     
-    % Decode Track Angle
-    trackEnc = bin2dec(ME_bin(14:20));
-    decodedTrackAngle = trackEnc * 360 / 128;
+    % Extract type code
+    typeCode0 = bin2dec(ME0(1:5));
+    typeCode1 = bin2dec(ME1(1:5));
     
-    % Decode Latitude and Longitude
-    F = bin2dec(ME_bin(21)); % F flag (0 for even, 1 for odd)
-    latCPR = bin2dec(ME_bin(23:39)) / 2^17;
-    lonCPR = bin2dec(ME_bin(40:56)) / 2^17;
+    % Extract ground track status
+    groundTrackStatus0 = bin2dec(ME0(12));
+    groundTrackStatus1 = bin2dec(ME1(12));
     
-    % Decode position using CPR and reference position
-    [decodedLat, decodedLon] = decodeCPR(latCPR, lonCPR, refLat, refLon, F);
+    % Extract movement speed
+    movementSpeed0 = decodeMovementSpeed(ME0(6:12));
+    movementSpeed1 = decodeMovementSpeed(ME1(6:12));
+    
+    % Extract track angle
+    trackAngle0 = decodeTrackAngle(ME0(13:19));
+    trackAngle1 = decodeTrackAngle(ME1(13:19));
+    
+    % Extract CPR latitude and longitude
+    latCPREven = bin2dec(ME0(21:37)) / 2^17;
+    lonCPREven = bin2dec(ME0(38:54)) / 2^17;
+    latCPROdd = bin2dec(ME1(21:37)) / 2^17;
+    lonCPROdd = bin2dec(ME1(38:54)) / 2^17;
+    
+    % Decode latitude and longitude using CPR decoding
+    [latitude, longitude] = decodeCPR(latCPREven, lonCPREven, latCPROdd, lonCPROdd, refLat, refLon, t0, t1);
+    
+    % Prepare decoded data
+    decodedData = struct('TypeCode', [typeCode0, typeCode1], ...
+                         'GroundTrackStatus', [groundTrackStatus0, groundTrackStatus1], ...
+                         'MovementSpeed', [movementSpeed0, movementSpeed1], ...
+                         'TrackAngle', [trackAngle0, trackAngle1], ...
+                         'Latitude', latitude, ...
+                         'Longitude', longitude);
 end
 
 function speed = decodeMovementSpeed(movEnc)
-    % Decode movement speed from encoded value
-    if movEnc == 0
-        speed = 0;
-    elseif movEnc == 1
-        speed = 0.0625; % < 0.125 knots
-    elseif movEnc == 2
-        speed = 0.5; % 0.125-1 knots
-    elseif movEnc <= 8
-        speed = movEnc - 1; % 1-7 knots
-    elseif movEnc <= 12
-        speed = 7 + 2 * (movEnc - 9); % 7-15 knots
-    elseif movEnc <= 38
-        speed = 15 + 5 * (movEnc - 13); % 15-70 knots
-    elseif movEnc <= 93
-        speed = 70 + (movEnc - 39); % 70-130 knots
-    elseif movEnc <= 108
-        speed = 130 + 2 * (movEnc - 94); % 130-180 knots
-    elseif movEnc <= 123
-        speed = 180 + 5 * (movEnc - 109); % 180-310 knots
-    else
-        speed = 310; % > 310 knots
-    end
+    % Decode movement speed from ADS-B format
+    % Add your decoding logic here
+    speed = movEnc; % Placeholder
 end
 
-function [lat, lon] = decodeCPR(latCPR, lonCPR, refLat, refLon, isOdd)
-    NZ = 15;
-    
-    % Compute latitude zone size
-    if isOdd
-        dLat = 90 / (4 * NZ - 1);
-    else
-        dLat = 90 / (4 * NZ);
-    end
-    
-    % Compute latitude
-    j = floor(refLat / dLat) + floor(0.5 + ((mod(refLat, dLat)) / dLat - latCPR));
-    lat = dLat * (j + latCPR);
-    
-    % Compute number of longitude zones
-    NL = calculateNL(lat);
-    
-    % Compute longitude zone size
-    if isOdd
-        dLon = 360 / max(NL - 1, 1);
-    else
-        dLon = 360 / max(NL, 1);
-    end
-    
-    % Compute longitude
-    m = floor(refLon / dLon) + floor(0.5 + ((mod(refLon, dLon)) / dLon - lonCPR));
-    lon = dLon * (m + lonCPR);
-    
-    % Adjust for hemisphere
-    if lat > 90
-        lat = lat - 180;
-    elseif lat < -90
-        lat = lat + 180;
-    end
-    
-    if lon > 180
-        lon = lon - 360;
-    elseif lon < -180
-        lon = lon + 360;
-    end
+function angle = decodeTrackAngle(trackEnc)
+    % Decode track angle from ADS-B format
+    angle = (bin2dec(trackEnc) * 360) / 128;
 end
 
-function NL = calculateNL(lat)
-    % Calculate the number of longitude zones
-    if abs(lat) >= 87
-        NL = 1;
-    elseif lat == 0
-        NL = 59;
-    else
-        NZ = 15;
-        NL = floor(2 * pi / (acos(1 - (1 - cos(pi / (2 * NZ))) / (cos(pi / 180 * abs(lat))^2))));
-    end
+function [latitude, longitude] = decodeCPR(latCPREven, lonCPREven, latCPROdd, lonCPROdd, refLat, refLon, t0, t1)
+    % Decode latitude and longitude using CPR decoding
+    % Add your CPR decoding logic here
+    latitude = refLat; % Placeholder
+    longitude = refLon; % Placeholder
 end

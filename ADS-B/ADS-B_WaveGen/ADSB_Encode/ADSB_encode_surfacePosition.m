@@ -2,24 +2,25 @@
 % Generates the Message (ME) field for surface position reports using Compact Position Reporting (CPR) encoding.
 %
 % Inputs:
-% movementSpeed = 17; 	 % Speed in knots
-% trackAngle = 45; 		 % Track angle in degrees
-% latitude = 47.6062; 	 % Latitude in degrees (example: Seattle, WA)
-% longitude = -122.3321; % Longitude in degrees (example: Seattle, WA)
-% t0 = 1631234567; 		 % Unix timestamp for even frame
-% t1 = 1631234568; 		 % Unix timestamp for odd frame (1 second later)
-% refLat = 47.6097; 	 % Reference latitude (example: Seattle, WA)
-% refLon = -122.3331; 	 % Reference longitude (example: Seattle, WA)
-% DF = 17; 				 % Downlink Format
-% CA = 5; 				 % Capability
-% ICAO = 'A1B2C3'; 		 % ICAO address
-% [msg0, msg1, mostRecent] = ADSB_encode_surfacePosition(movementSpeed, trackAngle, latitude, longitude, t0, t1, refLat, refLon, DF, CA, ICAO)
+% typeCode = 7; 			% Type code for surface position
+% groundTrackStatus = 1; 	% Ground track status (1 for valid, 0 for invalid)
+% movementSpeed = 17; 	% Speed in knots
+% trackAngle = 92.8125; 	% Track angle in degrees
+% latitude = 4.73473; 	% Latitude in degrees (example: Seattle, WA)
+% longitude = 4.375; 		% Longitude in degrees (example: Seattle, WA)
+% refLat = 51.990; 		% Reference latitude (example: Seattle, WA)
+% refLon = -122.3331; 	% Reference longitude (example: Seattle, WA)
+% t0 = 1457996410; 		% Unix timestamp for even frame
+% t1 = 1457996412; 		% Unix timestamp for odd frame (1 second later)
+% DF = 17; 				% Downlink Format
+% CA = 4; 				% Capability
+% ICAO = '484175'; 		% ICAO address (hexadecimal)
+% [msg0, msg1, mostRecent, breakdown0, breakdown1] = ADSB_encode_surfacePosition(typeCode, groundTrackStatus, movementSpeed, trackAngle, latitude, longitude, refLat, refLon, t0, t1, DF, CA, ICAO, timeFlag)
 %
 % Output:
-% msg0 =
-%     '8DA1B2C328D902F32A0010135FCA'
-% msg1 =
-%     '8DA1B2C328D908D584000E98E200'
+% msg0: 8C48417538DA13858A126CABE85A
+% msg1: 8C48417538DA15323E11E81C4BB2
+% msg1 is the most recent message
 % mostRecent =
 %     'msg1 is the most recent message'
 %
@@ -29,9 +30,15 @@
 % Verification Pending
 
 
-function [msg0, msg1, mostRecent] = ADSB_encode_surfacePosition(movementSpeed, trackAngle, latitude, longitude, t0, t1, refLat, refLon, DF, CA, ICAO)
+function [msg0, msg1, mostRecent] = ADSB_encode_surfacePosition(typeCode, groundTrackStatus, movementSpeed, trackAngle, latitude, longitude, refLat, refLon, t0, t1, DF, CA, ICAO, varargin)
+    % Set default value for timeFlag if not provided
+    if nargin < 14
+        timeFlag = 0; % Default time flag is 0
+    else
+        timeFlag = varargin{1}; % Use provided time flag
+    end
+
     % Constants
-    typeCode = 5; % Type Code for surface position messages (5-8)
     NZ = 15; % Number of zones
 
     % Calculate dLat for even and odd frames
@@ -64,8 +71,8 @@ function [msg0, msg1, mostRecent] = ADSB_encode_surfacePosition(movementSpeed, t
     lonCPROddBin = dec2bin(round(lonCPROdd * 2^17), 17);
     
     % Construct ME fields (56 bits each) with F flag for even and odd
-    meEven = [dec2bin(typeCode, 5) movEnc '1' trackEnc '0' '0' latCPREvenBin lonCPREvenBin];
-    meOdd = [dec2bin(typeCode, 5) movEnc '1' trackEnc '1' '0' latCPROddBin lonCPROddBin];
+    meEven = [dec2bin(typeCode, 5) movEnc num2str(groundTrackStatus) trackEnc num2str(timeFlag) '0' latCPREvenBin lonCPREvenBin];
+    meOdd = [dec2bin(typeCode, 5) movEnc num2str(groundTrackStatus) trackEnc num2str(timeFlag) '1' latCPROddBin lonCPROddBin];
     
     % Convert ME fields to hexadecimal
     meEvenHex = bin2hex(meEven);
@@ -92,7 +99,35 @@ function [msg0, msg1, mostRecent] = ADSB_encode_surfacePosition(movementSpeed, t
     else
         mostRecent = 'msg1 is the most recent message';
     end
+    
+    % % Break down the messages into binary and segregate type code
+    % breakdown0 = breakdownMessage(msg0);
+    % breakdown1 = breakdownMessage(msg1);
 end
+
+% function breakdown = breakdownMessage(msg)
+%     % Convert the entire message to binary
+%     msgBin = hexToBinaryVector(msg, length(msg) * 4);
+%     
+%     % Extract different parts of the message
+%     DF = msgBin(1:5);
+%     CA = msgBin(6:8);
+%     ICAO = msgBin(9:32);
+%     ME = msgBin(33:88);
+%     CRC = msgBin(89:end);
+%     
+%     % Extract type code from ME field
+%     typeCode = ME(1:5);
+%     
+%     % Create a structure with the breakdown
+%     breakdown = struct('FullBinary', strjoin(cellstr(char(msgBin + '0')), ''), ...
+%                        'DF', strjoin(cellstr(char(DF + '0')), ''), ...
+%                        'CA', strjoin(cellstr(char(CA + '0')), ''), ...
+%                        'ICAO', strjoin(cellstr(char(ICAO + '0')), ''), ...
+%                        'ME', strjoin(cellstr(char(ME + '0')), ''), ...
+%                        'TypeCode', strjoin(cellstr(char(typeCode + '0')), ''), ...
+%                        'CRC', strjoin(cellstr(char(CRC + '0')), ''));
+% end
 
 function NL = calculateNL(lat)
     % Calculate the number of longitude zones
