@@ -2,26 +2,15 @@
 % Generates the Message (ME) field for surface position reports using Compact Position Reporting (CPR) encoding.
 %
 % Inputs:
-% movementSpeed = 17; 	 % Speed in knots
-% trackAngle = 45; 		 % Track angle in degrees
-% latitude = 47.6062; 	 % Latitude in degrees (example: Seattle, WA)
-% longitude = -122.3321; % Longitude in degrees (example: Seattle, WA)
-% t0 = 1631234567; 		 % Unix timestamp for even frame
-% t1 = 1631234568; 		 % Unix timestamp for odd frame (1 second later)
-% refLat = 47.6097; 	 % Reference latitude (example: Seattle, WA)
-% refLon = -122.3331; 	 % Reference longitude (example: Seattle, WA)
-% DF = 17; 				 % Downlink Format
-% CA = 5; 				 % Capability
-% ICAO = 'A1B2C3'; 		 % ICAO address
-% [msg0, msg1, mostRecent] = ADSB_encode_surfacePosition(movementSpeed, trackAngle, latitude, longitude, t0, t1, refLat, refLon, DF, CA, ICAO)
+% latitude = 52.2572;
+% longitude = 3.91937;
+% speed = 10;  % knots
+% track = 45;  % degrees
+% t = 0;       % time flag
+% 
 %
 % Output:
-% msg0 =
-%     '8DA1B2C328D902F32A0010135FCA'
-% msg1 =
-%     '8DA1B2C328D908D584000E98E200'
-% mostRecent =
-%     'msg1 is the most recent message'
+% me_hex: '2C1400B4E1C0C4F8'
 %
 % Note: The actual output may vary slightly due to rounding in floating-point calculations.
 % Self_note: This function encodes only the ME field. Yet to create a complete ADS-B message. 
