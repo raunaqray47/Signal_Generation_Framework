@@ -195,42 +195,57 @@ ADSB_encode_surfacePosition.m
 
 typeCode = 7; 			% Type code for surface position
 groundTrackStatus = 1; 	% Ground track status (1 for valid, 0 for invalid)
-movementSpeed = 15; 	% Speed in knots
-trackAngle = 45;		% Track angle in degrees
-latitude = 47.6062; 	% Latitude in degrees (example: Seattle, WA)
-longitude = -122.3321; 	% Longitude in degrees (example: Seattle, WA)
-refLat = 47.6097; 		% Reference latitude (example: Seattle, WA)
-refLon = -122.3331; 	% Reference longitude (example: Seattle, WA)
-t0 = 1631234567;	 	% Unix timestamp for even frame
-t1 = 1631234568; 		% Unix timestamp for odd frame (1 second later)
+movementSpeed = 17; 	% Speed in knots
+trackAngle = 92.8125; 	% Track angle in degrees
+latitude = 52.32061; 	% Latitude in degrees
+longitude = 4.73473; 		% Longitude in degrees
+refLat = 51.990; 		% Reference latitude)
+refLon = 4.375; 		% Reference longitude
+t0 = 1457996410; 		% Unix timestamp for even frame
+t1 = 1457996412; 		% Unix timestamp for odd frame
 DF = 17; 				% Downlink Format
-CA = 5; 				% Capability
-ICAO = 'A1B2C3'; 		% ICAO address (hexadecimal)
+CA = 4; 				% Capability
+ICAO = '484175'; 		% ICAO address (hexadecimal)
 
 [msg0, msg1, mostRecent] = ADSB_encode_surfacePosition(typeCode, groundTrackStatus, movementSpeed, trackAngle, latitude, longitude, refLat, refLon, t0, t1, DF, CA, ICAO)
 
 
 END-----------------------------------------------------------------------------------------------------------------------------------
 
-msg0 = '8DA1B2C328D902F32A0010135FCA';
-msg1 = '8DA1B2C328D908D584000E98E200';
-refLat = 47.5;
-refLon = -122.22;
-[decodedSpeed0, decodedTrackAngle0, decodedLat0, decodedLon0] = ADSB_decode_surfacePosition(msg0, refLat, refLon);
-[decodedSpeed1, decodedTrackAngle1, decodedLat1, decodedLon1] = ADSB_decode_surfacePosition(msg1, refLat, refLon);
+ADSB_encode_airborneVelocities.m
 
-% Display results
-disp('Decoded Even Frame:');
-disp(['Speed: ', num2str(decodedSpeed0), ' knots']);
-disp(['Track Angle: ', num2str(decodedTrackAngle0), ' degrees']);
-disp(['Latitude: ', num2str(decodedLat0), ' degrees']);
-disp(['Longitude: ', num2str(decodedLon0), ' degrees']);
+DF = 17;                      % Downlink Format
+CA = 5;                       % Capability
+ICAO_hex = '485020';         % ICAO Address in hexadecimal
+TypeCode = 19;               % Type Code for airborne velocity
+IntentChangeFlag = 0;        % Intent Change Flag
+IFRCapabilityFlag = 1;       % IFR Capability Flag
+NUC = 0;                     % Navigation Uncertainty Category
+ReservedBits = 0;            % Reserved Bits
+speed = 159.20;              % Aircraft speed in knots
+track_angle = 182.88;        % Track angle in degrees
+Sew = 1;                     % Sign bit for East-West component
+Sns = 1;                     % Sign bit for North-South component
+subtype = 1;                 % Sub-type 1
+SH = 0;                      % Status bit for magnetic heading (available)
+T = 0;                       % Airspeed type (0 for IAS)
+VrSrc = 0;                   % Vertical Rate Source (1 for barometric altitude)
+S_Vr = 1;                    % Vertical Rate Direction (0 for climb)
+VS = -832;                   % Vertical Rate in ft/min
+sign_bit = 0;                % Sign bit for altitude difference (0 or 1)
+dAlt = 550;                  % Altitude difference in feet
 
-disp('Decoded Odd Frame:');
-disp(['Speed: ', num2str(decodedSpeed1), ' knots']);
-disp(['Track Angle: ', num2str(decodedTrackAngle1), ' degrees']);
-disp(['Latitude: ', num2str(decodedLat1), ' degrees']);
-disp(['Longitude: ', num2str(decodedLon1), ' degrees']);
+% Call the function
+[adsb_bin, adsb_hex, Vew, Vns, HDG, AS, VR, dAlt] = ADSB_encode_Velocity(DF, CA, ICAO_hex, TypeCode, IntentChangeFlag, IFRCapabilityFlag, NUC, ReservedBits, speed, track_angle, Sew, Sns, subtype, SH, T, VrSrc, S_Vr, VS, sign_bit, dAlt);
 
+% Display the results
+disp(['ADS-B Message in binary: ', adsb_bin]);
+disp(['ADS-B Message in hexadecimal: ', adsb_hex]);
+disp(['East-West Velocity (Vew): ', num2str(Vew)]);
+disp(['North-South Velocity (Vns): ', num2str(Vns)]);
+disp(['Magnetic Heading (HDG): ', num2str(HDG)]);
+disp(['Airspeed (AS): ', num2str(AS)]);
+disp(['Vertical Rate (VR): ', num2str(VR)]);
+disp(['Altitude Difference (dAlt): ', num2str(dAlt), ' feet']);
 
 END-----------------------------------------------------------------------------------------------------------------------------------
