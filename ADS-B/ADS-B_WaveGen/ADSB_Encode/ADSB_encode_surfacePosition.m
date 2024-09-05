@@ -4,17 +4,17 @@
 % Inputs:
 % typeCode = 7; 			% Type code for surface position
 % groundTrackStatus = 1; 	% Ground track status (1 for valid, 0 for invalid)
-% movementSpeed = 17; 	% Speed in knots
+% movementSpeed = 17; 	    % Speed in knots
 % trackAngle = 92.8125; 	% Track angle in degrees
-% latitude = 4.73473; 	% Latitude in degrees (example: Seattle, WA)
+% latitude = 4.73473; 	    % Latitude in degrees (example: Seattle, WA)
 % longitude = 4.375; 		% Longitude in degrees (example: Seattle, WA)
-% refLat = 51.990; 		% Reference latitude (example: Seattle, WA)
-% refLon = -122.3331; 	% Reference longitude (example: Seattle, WA)
-% t0 = 1457996410; 		% Unix timestamp for even frame
-% t1 = 1457996412; 		% Unix timestamp for odd frame (1 second later)
-% DF = 17; 				% Downlink Format
-% CA = 4; 				% Capability
-% ICAO = '484175'; 		% ICAO address (hexadecimal)
+% refLat = 51.990; 		    % Reference latitude (example: Seattle, WA)
+% refLon = -122.3331; 	    % Reference longitude (example: Seattle, WA)
+% t0 = 1457996410; 		    % Unix timestamp for even frame
+% t1 = 1457996412; 		    % Unix timestamp for odd frame (1 second later)
+% DF = 17; 				    % Downlink Format
+% CA = 4; 				    % Capability
+% ICAO = '484175'; 		    % ICAO address (hexadecimal)
 % [msg0, msg1, mostRecent, breakdown0, breakdown1] = ADSB_encode_surfacePosition(typeCode, groundTrackStatus, movementSpeed, trackAngle, latitude, longitude, refLat, refLon, t0, t1, DF, CA, ICAO, timeFlag)
 %
 % Output:
@@ -25,8 +25,6 @@
 %     'msg1 is the most recent message'
 %
 % Note: The actual output may vary slightly due to rounding in floating-point calculations.
-% Self_note: This function encodes only the ME field. Yet to create a complete ADS-B message. 
-% Prepend the Downlink Format (DF), Capability (CA), and ICAO address, and append the CRC to this ME field.
 % Verification Pending
 
 
