@@ -25,7 +25,7 @@ DF = 17;
 CA = 5;
 ICAO_hex = '4840D6';
 type_code = 4;
-category = 0;
+category = 1;
 aircraft_id = 'KLM1023';
 ADSB_aircraftID_category(DF, CA, ICAO_hex, type_code, category, aircraft_id)
 
@@ -132,7 +132,7 @@ generatePPM.m -
 
 INPUT: 
 
-hex_input = 'F88EF4DFBEC26BC4F0B19446E32FEA6B';
+hex_input = '8D4840D6212CC371C32CE08B1A6F';
 [ppm_signal_encrypted, time_axis_encrypted] = generatePPM(hex_input);
 
 OUTPUT: 
@@ -150,7 +150,7 @@ generateFlippedPPM.m -
 
 INPUT: 
 
-hex_value = 'F8';
+hex_value = '8D4840D6212CC371C32CE08B1A6F';
 generateFlippedPPM(hex_value);
 
 OUTPUT: 
@@ -236,7 +236,7 @@ sign_bit = 0;                % Sign bit for altitude difference (0 or 1)
 dAlt = 550;                  % Altitude difference in feet
 
 % Call the function
-[adsb_bin, adsb_hex, Vew, Vns, HDG, AS, VR, dAlt] = ADSB_encode_Velocity(DF, CA, ICAO_hex, TypeCode, IntentChangeFlag, IFRCapabilityFlag, NUC, ReservedBits, speed, track_angle, Sew, Sns, subtype, SH, T, VrSrc, S_Vr, VS, sign_bit, dAlt);
+[adsb_bin, adsb_hex, adsb_crc, Vew, Vns, HDG, AS, VR, dAlt] = ADSB_encode_Velocity(DF, CA, ICAO_hex, TypeCode, IntentChangeFlag, IFRCapabilityFlag, NUC, ReservedBits, speed, track_angle, Sew, Sns, subtype, SH, T, VrSrc, S_Vr, VS, sign_bit, dAlt);
 
 % Display the results
 disp(['ADS-B Message in binary: ', adsb_bin]);
@@ -249,3 +249,22 @@ disp(['Vertical Rate (VR): ', num2str(VR)]);
 disp(['Altitude Difference (dAlt): ', num2str(dAlt), ' feet']);
 
 END-----------------------------------------------------------------------------------------------------------------------------------
+timestamp,
+lat lon, alt (GNSS and baro),
+speed, track, velocity,
+received signal strength,
+same setup as ADS-B for other signals (RemoteID and 900MHz ISM),
+listen on ADS-B and send it out on WiFi or vice-versa
+Band-agile radio
+
+-Due to Ukraine, ADS-B messages are completely off. Spoofing stuff. 
+-Band hopping
+
+•	Engineered a MATLAB-based signal generation framework for a NASA SBIR-funded 180nm multi-band CMOS radio transceiver IC (BORN), enabling verification of its multi-band, multi-protocol Unmanned Ariel Systems (UAS) tracking capabilities, supporting real-time monitoring and Unmanned Traffic Management (UTM) systems. 
+
+END-----------------------------------------------------------------------------------------------------------------------------------
+
+generatePPMWithFlipped.m
+
+hex_input = '8D4840D6212CC371C32CE08B1A6F';
+generatePPMWithFlipped(hex_input);
