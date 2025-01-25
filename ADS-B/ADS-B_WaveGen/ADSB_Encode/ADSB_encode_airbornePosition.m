@@ -91,7 +91,13 @@ end
 
 function NL = calculateNL(lat)
     % Calculate the number of longitude zones
-    if abs(lat) >= 87
+    if abs(lat) > 87
+        NL = 1;
+    elseif abs(lat) < -87
+        NL = 1;
+    elseif abs(lat) == -87
+        NL = 2;
+    elseif abs(lat) == 87
         NL = 2;
     elseif lat == 0
         NL = 59;
