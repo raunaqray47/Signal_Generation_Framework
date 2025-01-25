@@ -1,12 +1,11 @@
 function [ppm_signal, time_axis] = generatePPM(hex_input)
     % Convert hex input to binary
     binary_message = hexToBinaryVector(hex_input);
-    
     % ADS-B PPM encoding parameters
     bit_rate = 1000000; % 1 Mbps
-    samples_per_second = 20000000; % 20 MHz sampling rate for smooth representation
+    samples_per_second = 20000000; % 20 MHz
     samples_per_bit = samples_per_second / bit_rate;
-    pulse_width_samples = round(0.5 * samples_per_bit); % 0.5 μs pulse width
+    pulse_width_samples = round(0.5 * samples_per_bit); % 0.5μs pulse width
     
     % Initialize PPM signal
     ppm_signal = zeros(1, length(binary_message) * samples_per_bit);
@@ -18,10 +17,10 @@ function [ppm_signal, time_axis] = generatePPM(hex_input)
         end_index = start_index + samples_per_bit - 1;
         
         if binary_message(i) == 1
-            % 1 bit: 0.5 μs pulse followed by 0.5 μs flat signal
+            % 1: 0.5μs pulse followed by 0.5μs flat signal
             ppm_signal(start_index:mid_index-1) = 1;
         else
-            % 0 bit: 0.5 μs flat signal followed by 0.5 μs pulse
+            % 0: 0.5μs flat signal followed by 0.5μs pulse
             ppm_signal(mid_index:end_index) = 1;
         end
     end
