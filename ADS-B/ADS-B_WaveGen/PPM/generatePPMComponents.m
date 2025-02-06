@@ -1,4 +1,7 @@
 function generatePPMComponents(hex_input)
+    %Save file location
+    output_dir = 'C:\Users\rauna\OneDrive - UW\Study\Project\Summer_Internship\ADS-B\ADS-B_WaveGen\PPM\CSV';
+
     % Parameters
     bit_rate = 1e6;         % 1 Mbps
     sampling_rate = 20e6;   % 20 MHz
@@ -44,6 +47,17 @@ function generatePPMComponents(hex_input)
     xlabel('Time (μs)');
     ylabel('Amplitude');
     legend show;
+
+    % Save I+ component
+    i_plus_file = fullfile(output_dir, 'i_plus_component.txt');
+    writematrix([time_axis', i_plus_signal'], i_plus_file, 'Delimiter', 'tab');
+    
+    % Save I- component
+    i_minus_file = fullfile(output_dir, 'i_minus_component.txt');
+    writematrix([time_axis', i_minus_signal'], i_minus_file, 'Delimiter', 'tab');
+    
+    disp(['I+ component saved to: ', i_plus_file]);
+    disp(['I- component saved to: ', i_minus_file]);
 end
 
 function [ppm_signal, time_axis] = generateAlternatingPPM(binary_message, bit_rate, samples_per_bit, pulse_width_samples, amplitude)
