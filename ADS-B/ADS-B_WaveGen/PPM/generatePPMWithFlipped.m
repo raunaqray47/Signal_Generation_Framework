@@ -24,8 +24,8 @@ function generatePPMWithFlipped(hex_input)
     
     % Plot original signal
     figure;
-    plot(time_axis * 1e6, original_signal);
-    ylim([-1.5 1.5]);
+    stairs(time_axis * 1e6, original_signal);
+    ylim([-0.5 1.5]);
     title('Original PPM Signal with Preamble');
     xlabel('Time (μs)');
     ylabel('Amplitude');
@@ -40,8 +40,8 @@ function generatePPMWithFlipped(hex_input)
     
     % Plot flipped signal
     figure;
-    plot(time_axis * 1e6, flipped_signal);
-    ylim([-1.5 1.5]);
+    stairs(time_axis * 1e6, flipped_signal);
+    ylim([-1.5 0.5]);
     title('Flipped PPM Signal');
     xlabel('Time (μs)');
     ylabel('Amplitude');
@@ -53,9 +53,9 @@ function generatePPMWithFlipped(hex_input)
     
     % Plot combined signals
     figure;
-    plot(time_axis * 1e6, original_signal, 'b', 'DisplayName', 'Original');
+    stairs(time_axis * 1e6, original_signal, 'b', 'DisplayName', 'Original');
     hold on;
-    plot(time_axis * 1e6, flipped_signal, 'r', 'DisplayName', 'Flipped');
+    stairs(time_axis * 1e6, flipped_signal, 'r', 'DisplayName', 'Flipped');
     ylim([-1.5 1.5]);
     title('Combined PPM Signals');
     xlabel('Time (μs)');
