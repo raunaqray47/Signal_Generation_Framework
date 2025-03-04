@@ -162,7 +162,7 @@ end
 function [ppm_signal, time_axis] = generatePPM(binary_message)
     % ADS-B PPM encoding parameters
     bit_rate = 1000000; % 1 Mbps
-    samples_per_second = 20000000; % 20 MHz sampling rate for smooth representation
+    samples_per_second = 20000000; % 20 MHz sampling rate
     samples_per_bit = samples_per_second / bit_rate;
     pulse_width_samples = round(0.5 * samples_per_bit); % 0.5 μs pulse width
     
