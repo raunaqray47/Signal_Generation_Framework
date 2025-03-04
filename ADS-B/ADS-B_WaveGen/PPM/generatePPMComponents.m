@@ -20,7 +20,7 @@ function generatePPMComponents(hex_input)
 
     % Plot I+ component
     figure;
-    plot(time_axis * 1e6, i_plus_signal, 'b');
+    stairs(time_axis * 1e6, i_plus_signal, 'b');
     ylim([-1.5, 1.5]);
     grid on;
     title('I+ Component');
@@ -29,7 +29,7 @@ function generatePPMComponents(hex_input)
 
     % Plot I- component
     figure;
-    plot(time_axis * 1e6, i_minus_signal, 'r');
+    stairs(time_axis * 1e6, i_minus_signal, 'r');
     ylim([-1.5, 1.5]);
     grid on;
     title('I- Component');
@@ -38,9 +38,9 @@ function generatePPMComponents(hex_input)
 
     % Plot combined I+ and I- components
     figure;
-    plot(time_axis * 1e6, i_plus_signal, 'b', 'DisplayName', 'I+ Component');
+    stairs(time_axis * 1e6, i_plus_signal, 'b', 'DisplayName', 'I+ Component');
     hold on;
-    plot(time_axis * 1e6, i_minus_signal, 'r', 'DisplayName', 'I- Component');
+    stairs(time_axis * 1e6, i_minus_signal, 'r', 'DisplayName', 'I- Component');
     ylim([-1.5, 1.5]);
     grid on;
     title('I+ and I- Components');
