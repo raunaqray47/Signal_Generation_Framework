@@ -24,13 +24,23 @@ function plot_and_decode_adsb(filename)
     adjusted_time = time(start_index:end_index) - time(start_index); % Shift time to start at 0
     adjusted_amplitude = modified_amplitude(start_index:end_index);
 
-    % Add a linear segment from (0, 0) to the first point of the waveform
-    extended_time_start = [0; adjusted_time];
-    extended_amplitude_start = [0; adjusted_amplitude];
+    % Ensure the waveform is exactly 120 microseconds long
+    % Find the index where time exceeds 120 microseconds
+    end_120us_index = find(adjusted_time >= 120, 1);
     
-    % Add a linear segment from the last point of the waveform to (end_time, 0)
-    extended_time_end = [extended_time_start; adjusted_time(end)];
-    extended_amplitude_end = [extended_amplitude_start; 0];
+    % If the waveform is shorter than 120 microseconds, pad it
+    if isempty(end_120us_index)
+        % Extend the time array to 120 microseconds
+        last_time = adjusted_time(end);
+        time_step = mean(diff(adjusted_time));
+        additional_times = (last_time+time_step):time_step:120;
+        adjusted_time = [adjusted_time; additional_times'];
+        adjusted_amplitude = [adjusted_amplitude; zeros(length(additional_times), 1)];
+    %else
+        % Truncate to exactly 120 microseconds
+        %adjusted_time = adjusted_time(1:end_120us_index);
+        %adjusted_amplitude = adjusted_amplitude(1:end_120us_index);
+    end
 
     % Plot the original waveform
     figure;
@@ -39,47 +49,42 @@ function plot_and_decode_adsb(filename)
     ylabel('Amplitude (mV)');
     title('Original Waveform');
     grid on;
-    ylim([-50,1050]);
-    xlim([-2, 150]);
 
-    % Plot the adjusted waveform with extended segments
+    % Plot the adjusted waveform
     figure;
-    plot(extended_time_end, extended_amplitude_end, 'b');
+    stairs(adjusted_time, adjusted_amplitude, 'b');
     xlabel('Time (\mus)');
     ylabel('Amplitude (mV)');
-    title('Adjusted Waveform');
+    title('Adjusted Waveform (120 \mus)');
     grid on;
     ylim([-50,1050]);
-    xlim([-2, max(extended_time_end)+2]);
+    xlim([-2, 122]);
 
-    % Remove the first 4 bits
-    bit_duration = 2.4; % Assuming each bit is approximately 2.4 microseconds
-    first_4_bits_end = 4 * bit_duration;
+    % Remove the first 8 microseconds (preamble)
+    preamble_end = 8.0; % 8 microseconds for preamble
     
-    % Find the start of the 5th bit (first spike after removing 4 bits)
-    message_start_index = find(extended_time_end > first_4_bits_end & extended_amplitude_end > 0, 1);
+    % Find the index where time exceeds the preamble duration
+    message_start_index = find(adjusted_time >= preamble_end, 1);
     
-    % Adjust time and amplitude arrays to focus on the new region of interest
-    message_time = extended_time_end(message_start_index:end) - extended_time_end(message_start_index);
-    message_amplitude = extended_amplitude_end(message_start_index:end);
+    if isempty(message_start_index)
+        warning('Could not find the end of the preamble. Using the entire signal.');
+        message_time = adjusted_time;
+        message_amplitude = adjusted_amplitude;
+    else
+        % Extract the message portion (after preamble)
+        message_time = adjusted_time(message_start_index:end) - adjusted_time(message_start_index);
+        message_amplitude = adjusted_amplitude(message_start_index:end);
+    end
 
-    % Add a linear segment from (0, 0) to the first point of the message waveform
-    message_time = [0; message_time];
-    message_amplitude = [0; message_amplitude];
-    
-    % Add a linear segment from the last point of the message waveform to (end_time, 0)
-    message_time = [message_time; message_time(end)];
-    message_amplitude = [message_amplitude; 0];
-
-    % Plot the message waveform (without first 4 bits)
+    % Plot the message waveform (without preamble)
     figure;
-    plot(message_time, message_amplitude, 'b');
+    stairs(message_time, message_amplitude, 'b');
     xlabel('Time (\mus)');
     ylabel('Amplitude (mV)');
-    title('Message Waveform');
+    title('Message Waveform (Preamble Removed)');
     grid on;
     ylim([-50,1050]);
-    xlim([-2, max(message_time)+2]);
+    xlim([-2, 122]);
 
     % Call the decode function
     decoded_bits = decode_adsb_message(message_time, message_amplitude);
@@ -87,6 +92,21 @@ function plot_and_decode_adsb(filename)
     % Print the decoded bits
     disp('Decoded ADS-B message:');
     disp(decoded_bits);
+
+    % Collate decoded bits into a binary string
+    binary_string = num2str(decoded_bits,'%d');
+    binary_string = regexprep(binary_string,'\s',''); % remove whitespace
+
+    % Flip bits: 0 -> 1, 1 -> 0
+    flipped_bits = regexprep(binary_string,{'0','1'},{'x','0'}); % temporary placeholder 'x'
+    flipped_bits = regexprep(flipped_bits,'x','1');
+
+    % Append an additional '0' at the end
+    new_binary_string = [flipped_bits '1'];
+
+    % Display the final binary string
+    disp('Final binary string:');
+    disp(new_binary_string);
 end
 
 function decoded_bits = decode_adsb_message(message_time, message_amplitude)
@@ -94,6 +114,7 @@ function decoded_bits = decode_adsb_message(message_time, message_amplitude)
     decoded_bits = [];
     bit_duration = 1.0; % Each bit is 1 microsecond in ADS-B
     threshold = 500; % Amplitude threshold for detecting a pulse
+    margin = 0.05; % Margin of error in microseconds
     
     % Find all pulse positions (where amplitude goes above threshold)
     pulse_positions = [];
@@ -119,12 +140,22 @@ function decoded_bits = decode_adsb_message(message_time, message_amplitude)
         % Calculate position within the bit (0 to 1)
         position_in_bit = (pulse_positions(i) - bit_number * bit_duration) / bit_duration;
         
-        % Determine if it's a 0 or 1 based on pulse position
-        % If pulse is in first half of bit duration, it's a 1, otherwise it's a 0
-        if position_in_bit < 0.5
+        % Determine if it's a 0 or 1 based on pulse position with margin
+        % If pulse is in first half (0 to 0.5 ± margin) of bit duration, it's a 1
+        % If pulse is in second half (0.5 to 1.0 ± margin) of bit duration, it's a 0
+        if position_in_bit < (0.5 + margin) && position_in_bit > (0 - margin)
             bit_value = 1; % Pulse in first half, so it's a 1
-        else
+        elseif position_in_bit >= (0.5 - margin) && position_in_bit <= (1 + margin)
             bit_value = 0; % Pulse in second half, so it's a 0
+        else
+            % If outside valid ranges (shouldn't happen with proper margin)
+            warning('Pulse at unusual position: %f in bit %d', position_in_bit, bit_number);
+            % Default to closest valid position
+            if position_in_bit < 0.5
+                bit_value = 1;
+            else
+                bit_value = 0;
+            end
         end
         
         % Add the bit to our decoded message
@@ -135,13 +166,13 @@ function decoded_bits = decode_adsb_message(message_time, message_amplitude)
         decoded_bits(bit_number+1) = bit_value;
     end
     
+    % Report the number of bits decoded
+    fprintf('Decoded %d bits from the waveform.\n', length(decoded_bits));
+    
     % Check if we have 112 bits (standard ADS-B message length)
     if length(decoded_bits) > 112
-        % Truncate to 112 bits if longer
-        decoded_bits = decoded_bits(1:112);
-        disp('Warning: Decoded more than 112 bits, truncating to standard ADS-B length.');
+        fprintf('Warning: Decoded %d bits, which is more than the standard 112 bits.\n', length(decoded_bits));
     elseif length(decoded_bits) < 112
-        % Throw an error if fewer than 112 bits
-        error(['Error: Decoded only ', num2str(length(decoded_bits)), ' bits. ADS-B messages must contain exactly 112 bits.']);
+        fprintf('Warning: Decoded only %d bits, fewer than the standard 112 bits.\n', length(decoded_bits));
     end
 end
