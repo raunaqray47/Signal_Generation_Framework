@@ -30,7 +30,7 @@ function generatePPMWithFlipped(hex_input)
     xlabel('Time (μs)');
     ylabel('Amplitude');
     grid on;
-    
+
     % Save original signal
     writematrix([time_axis', original_signal'], output_original, 'Delimiter', 'tab');
     disp(['Original signal saved to: ', output_original]);
