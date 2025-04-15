@@ -9,7 +9,7 @@ function plot_and_decode_adsb(filename)
     % Create a modified amplitude
     modified_amplitude = amplitude;
     modified_amplitude(modified_amplitude < 0) = 0; % Set amplitudes below 0 mV to 0 mV
-    modified_amplitude(modified_amplitude > 500) = 1000; % Set amplitudes above 500 mV to 1000 mV
+    modified_amplitude(modified_amplitude > 30) = 1000; % Set amplitudes above 500 mV to 1000 mV
 
     % Find the indices where the waveform starts and ends
     pulse_indices = find(modified_amplitude > 0); % Non-zero amplitudes indicate pulses

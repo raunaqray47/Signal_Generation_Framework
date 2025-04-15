@@ -112,7 +112,16 @@ function binary_vector = hexToBinaryVector(hex_str)
     hex_map = containers.Map({'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'}, ...
         {'0000','0001','0010','0011','0100','0101','0110','0111','1000','1001','1010','1011','1100','1101','1110','1111'});
     
+    % Convert to character array if input is a string
+    hex_str = char(hex_str);  % Add this line
+    hex_str = upper(hex_str);
+    
+    valid_hex_chars = '0123456789ABCDEF';
+    if ~all(ismember(hex_str, valid_hex_chars))
+        error('Input string contains invalid hexadecimal characters.');
+    end
+    
     for i = 1:length(hex_str)
-        binary_vector = [binary_vector, hex_map(upper(hex_str(i)))];
+        binary_vector = [binary_vector, hex_map(hex_str(i))];
     end
 end
